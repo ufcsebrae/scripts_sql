@@ -1,0 +1,409 @@
+
+WITH SERV AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        IIF(cln.CREDITO LIKE '3.1.2%', cln.CREDITO, cln.DEBITO) AS COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+	WHERE
+    YEAR(cln.DATA) = YEAR(GETDATE())
+    AND (cln.DEBITO NOT LIKE '2.4.1.1.01%' OR cln.DEBITO IS NULL)
+    AND (cln.CREDITO LIKE '3.1.2%' OR cln.DEBITO LIKE '3.1.2%')
+    AND cln.COMPLEMENTO IS NOT NULL
+
+)
+,
+PESSOAL AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        IIF(cln.CREDITO LIKE '3.1.1%', cln.CREDITO, cln.DEBITO) AS COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+	where   YEAR(cln.[DATA]) = YEAR(GETDATE()) and
+				(DEBITO not like '2.4.1.1.01%' or DEBITO is null) and
+				(Debito like '3.1.1%' or Credito like '3.1.1%') and 
+				COMPLEMENTO is not null and COMPLEMENTO not like 'Custo Serviço e financeiro referente ao ano de 2018'
+)
+,
+CRED AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        iif(cln.DEBITO like '5.1.1.2%', cln.debito, cln.credito) AS COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+	where YEAR(cln.DATA) = YEAR(GETDATE()) and 
+				(DEBITO not like '2.4.1.1.01%' or DEBITO is null) and
+				COMPLEMENTO is not null and Debito like '5.2.5.3%'
+)
+,
+LIBERCONV AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        iif(cln.DEBITO like '5.1.1.2%' or cln.DEBITO like '1.9.5.7.01.001',cln.debito, cln.credito) AS COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,	
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+	where  YEAR(cln.DATA) = YEAR(GETDATE()) and 
+				(DEBITO not like '2.4.1.1.01%' or DEBITO is null) and
+				COMPLEMENTO is not null 
+				and (CODGERENCIAL not like '9.99999.999999.999'
+				and Debito like '5.1.1.2%' or CREDITO like '5.1.1.2%')
+)
+,
+IMOB AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        iif((cln.DEBITO like '5.2.2.2%' or cln.DEBITO like '5.2.3.1%' or cln.DEBITO like '1.9.5.2.03%' or cln.DEBITO like '1.9.5.2.04%' or cln.DEBITO like '1.9.5.2.03.004'), cln.debito, cln.credito) as COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,	
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+	where YEAR(cln.DATA) = YEAR(GETDATE()) and
+				((DEBITO not like '7.2.3.1.01%' and DEBITO not like '7.2.2.2.01%') or DEBITO is null) and
+				COMPLEMENTO is not null and
+				(Debito like '5.2.2.2%' or Credito like '5.2.2.2%' or Debito like '5.2.3.1%' or Credito like '5.2.3.1%')
+)
+,
+
+INVEST AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        iif(Debito like '5.2.2.1%' or Debito like '1.9.5.2.02%', CLN.debito, CLN.credito) as COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,	
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+		where  YEAR(CLN.[DATA]) = YEAR(GETDATE()) and 
+				(DEBITO not like '2.4.1.1.01%' or DEBITO is null) and
+				COMPLEMENTO is not null and
+				(Debito like '5.2.2.1%' or Credito like '5.2.2.1%') and IDRATEIO not like '1929077' 
+
+
+),
+
+FUNDO AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        iif(CLN.DEBITO like '5.2.5.2.01.001' or CLN.Debito like '1.9.5.1.01.003', CLN.debito, CLN.credito) as COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,	
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+			where  YEAR(CLN.[DATA]) = YEAR(GETDATE()) and 
+				(DEBITO not like '2.4.1.1.01%' or DEBITO is null) and
+				COMPLEMENTO is not null and
+				DEBITO like '5.2.5.2.01.001' OR
+				YEAR(CLN.[DATA]) = YEAR(GETDATE()) and 
+				CREDITO IN ('5.2.5.2.01.001')
+
+),
+
+ENCARGO AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        iif(Credito like '3.1.4%', CLN.credito, CLN.debito) as COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,	
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+			where  YEAR(CLN.[DATA]) = YEAR(GETDATE()) and
+				(DEBITO not like '2.4.1.1.01%' or DEBITO is null) and
+				(Debito like '3.1.4.1%' or Credito like '3.1.4.1%' or Debito like '3.1.4.2%' or Credito like '3.1.4.2%') and 
+				COMPLEMENTO is not null and IDRATEIO not in ('1537384', '1911286')
+
+),
+
+DEPOSITO AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        iif(cln.DEBITO like '5.2.4.1.01%' or cln.Debito like '1.9.5.1.01.001', cln.debito, cln.credito) as COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,	
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+		where  YEAR(CLN.[DATA]) = YEAR(GETDATE()) and 
+				(DEBITO not like '2.4.1.1.01%' or DEBITO is null)  and
+				(Debito like '5.2.4.1.01%' or CREDITO like '5.2.4.1.01%') 
+
+
+),
+
+CUSTO AS (
+    SELECT DISTINCT
+        crt.IDRATEIO,
+        crt.LCTREF,
+        tmc.IDOPERACAO,
+        crt.IDPARTIDA,
+        tct.IDMOV,
+        tmv.CODTMV,
+        tmv.CODUSUARIO,
+        tmv.DATAEMISSAO,
+        cln.CREDITO,
+        cln.DEBITO,
+        iif(Credito like '3.1.3%', cln.credito, cln.debito) as COD_CONTA,
+        crt.CODGERENCIAL,
+        cln.COMPLEMENTO,
+        cln.DATA,	
+        crt.VLRCREDITO,
+        crt.VLRDEBITO,
+        crt.VLRDEBITO - crt.VLRCREDITO AS UNIFICAVALOR
+    FROM HUBDADOS.CorporeRM.CRATEIOLC crt
+    LEFT JOIN HUBDADOS.CorporeRM.CLANCA cln
+        ON crt.LCTREF = cln.LCTREF
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCONT tmc
+        ON cln.IDPARTIDA = tmc.IDPARTIDA
+    LEFT JOIN HUBDADOS.CorporeRM.TMOVCTB tct
+        ON tmc.IDOPERACAO = tct.IDOPERACAO
+    LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+        ON tct.IDMOV = tmv.IDMOV
+		where   YEAR(CLN.[DATA]) = YEAR(GETDATE()) and
+				(DEBITO not like '2.4.1.1.01%' or DEBITO is null) and
+				(Debito like '3.1.3%' or Credito like '3.1.3%') and 
+				COMPLEMENTO is not null and IDRATEIO not like '1537388'
+
+),
+
+CC AS (
+SELECT 
+	A.CODCCUSTO
+	,B.NOME AS UNIDADE
+	,C.NOME AS PROJETO
+	,D.NOME AS ACAO
+
+FROM HUBDADOS.CorporeRM.GCCUSTO A
+	INNER JOIN HUBDADOS.CorporeRM.GCCUSTO B
+		ON A.CODCCUSTO = B.CODCCUSTO
+	INNER JOIN HUBDADOS.CorporeRM.GCCUSTO C
+		ON LEFT(A.CODCCUSTO,5) = C.CODCCUSTO
+	INNER JOIN HUBDADOS.CorporeRM.GCCUSTO D
+		ON LEFT(A.CODCCUSTO,12) = D.CODCCUSTO
+WHERE LEN(A.CODCCUSTO) > 15
+),
+
+baseDados AS (SELECT * FROM SERV UNION ALL SELECT * FROM PESSOAL UNION ALL SELECT * FROM CRED UNION ALL SELECT * FROM LIBERCONV UNION ALL SELECT * FROM IMOB UNION ALL SELECT * FROM INVEST UNION ALL SELECT * FROM FUNDO UNION ALL SELECT * FROM ENCARGO UNION ALL SELECT * FROM DEPOSITO UNION ALL SELECT * FROM CUSTO)
+
+SELECT
+    bd.IDRATEIO,
+    bd.LCTREF,
+    bd.IDOPERACAO,
+    bd.IDPARTIDA,
+    bd.DATA AS DATA_CONT,
+    bd.CREDITO,
+    bd.DEBITO,
+    CONCAT(bd.COD_CONTA COLLATE Latin1_General_CI_AS,' - ', CCTA.DESCRICAO) AS DESCCONTA,
+    RIGHT(bd.CODGERENCIAL,16) AS CC,
+	CC.PROJETO,
+	CC.ACAO,
+	CC.UNIDADE,
+    bd.COMPLEMENTO,
+	bd.CODUSUARIO,
+	bd.IDMOV,
+	CONCAT(bd.CODTMV COLLATE Latin1_General_CI_AS,' - ', TTMV.NOME) AS DESCMOV,
+	tmv.NUMEROMOV,
+    bd.DATAEMISSAO AS DATA_MOV,
+	tmv.HISTORICO as HIST_MOV,
+	FCFO.NOME AS FORNECEDOR,
+   	bd.VLRCREDITO,
+    bd.VLRDEBITO,
+    bd.UNIFICAVALOR as VALOR
+    
+FROM baseDados bd
+LEFT JOIN HUBDADOS.CorporeRM.TMOV tmv
+    ON bd.IDMOV = tmv.IDMOV
+LEFT JOIN CC CC
+	ON CC.CODCCUSTO = RIGHT(bd.CODGERENCIAL,16)
+LEFT JOIN HUBDADOS.CorporeRM.CCONTA CCTA
+	ON CCTA.CODCONTA COLLATE Latin1_General_CI_AS = bd.COD_CONTA
+LEFT JOIN HUBDADOS.CORPORERM.FCFO FCFO
+	ON FCFO.CODCFO = tmv.CODCFO
+LEFT JOIN HUBDADOS.CORPORERM.TTMV TTMV
+	ON TTMV.CODTMV = tmv.CODTMV
+
+
