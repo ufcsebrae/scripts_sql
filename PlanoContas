@@ -57,8 +57,8 @@ WITH PLANO_CONTAS AS (
 
         -- Lógica de Negócio para Receita/Despesa
         CASE 
-            WHEN LEFT(Nivel6.CODCONTA, 1) = '6' THEN 'RECEITAS'
-            WHEN LEFT(Nivel6.CODCONTA, 1) IN ('3', '5') THEN 'DESPESAS'
+            WHEN LEFT(Nivel6.CODCONTA, 1) = '6' THEN 1
+            WHEN LEFT(Nivel6.CODCONTA, 1) IN ('3', '5') THEN 2
             ELSE NULL 
         END AS RECEITA_DESPESA
 
@@ -71,8 +71,8 @@ WITH PLANO_CONTAS AS (
 
     -- Filtro para trazer apenas as contas analíticas (onde ocorrem os lançamentos)
     WHERE
-        Nivel6.ANALITICA = 'S' -- Mantive como 'S', que é mais comum para flags de texto. Se for numérico, mude para 1.
+        Nivel6.ANALITICA = 1 
 )
 -- Fim da CTE e início da consulta final
 SELECT *
-FROM PLANO_CONTAS;
+FROM PLANO_CONTAS WHERE Receita_despesa = 2;
